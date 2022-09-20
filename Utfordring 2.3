@@ -1,0 +1,112 @@
+# HELP SCRIPT FILE  Utfording 2.3 - sok-2008
+
+# Download the data file union_unempl.csv and store it in an easily accessible location, such as a folder on your Desktop or in your personal folder.
+# Install any R packages that you need using the command install.packages("package name").
+# You will need the following packages for the assignment: 
+
+
+# Set your working directory to the correct folder. 
+# Insert your file path for 'YOURFILEPATH'. 
+
+#setwd("FILEPATH")
+
+# You will need the following libraries for the assignment:
+
+library(readr) # fileformat of the dataset
+library(ggplot2)     # the ggplot package
+library(tidyverse)  # the tidyverse package
+
+
+# To carry out the assignment, you will need to combine the union_unempl data with map data. 
+
+
+union<- read_csv("https://uit-sok-2008-h22.github.io/Assets/union_unempl.csv") #This loads the data with information about the variables of interest
+View(union) #Displays the data
+#To combine the unemployment and union data with the map data, we merge on country name. 
+#We face two problems here: 1) United Kingdom is called "UK" in the map data, 2) the variable "country" is called "region" in the map data. We need to change this.
+
+#Changing the name of a single observation. The below code changes all observations called "United Kingdom" to "UK" in the union data. 
+union$country <- gsub("United Kingdom", "UK", union$country)
+View(union) 
+
+# Renaming a variable. The below code renames the variable "Country" to "Region".
+names(union)[names(union) == "country"] <- "region"
+View(union) 
+
+# Creating a new variable. To create a map showing "Excess coverage", you need to create a new variable. The below code shows how to create a new variable in R. 
+
+mapdata1$excess_coverage<-mapdata1$coverage - mapdata1$density #A difference
+
+
+# You are now ready to create your maps! Follow the tutorial at https://www.youtube.com/watch?v=AgWgPSZ7Gp0 
+
+mapdata <- map_data("world")
+view(mapdata)
+
+mapdata <- left_join(mapdata, union, by= "region")
+view(mapdata)
+
+mapdata1 <- mapdata %>% filter(!is.na(mapdata$unempl))
+view(mapdata1)
+
+#lager et Kart over Europa som viser arbeidsledighetsraten til forskjellige land.
+
+Arbkart1 <- ggplot(mapdata1, aes(x = long, y = lat, group = group)) +
+  geom_polygon(aes(fill = unempl), col = "black")
+Arbkart1
+
+ArbKart1.1 <- ArbKart1 + scale_fill_gradient(name = "Arbeidsledighet Prosent", low = "green", high = "red", na.value = "grey50") +
+  theme(axis.text.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks = element_blank(),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        rect = element_blank())
+ArbKart1.1
+
+##
+
+ArbKart2 <- ggplot(mapdata1, aes(x = long, y = lat, group = group)) +
+  geom_polygon(aes(fill = density), col = "black")
+ArbKart2
+
+Arbkart2.1 <- ArbKart2 + scale_fill_gradient(name = "Fagforeningsdensitet i Prosent", low = "red", high = "green", na.value = "grey50") +
+  theme(axis.text.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks = element_blank(),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        rect = element_blank())
+ArbKart2.1
+
+##
+
+Arbkart3 <- ggplot(mapdata1, aes(x = long, y = lat, group = group)) +
+  geom_polygon(aes(fill = excess_coverage), col = "black")
+Arbkart3
+
+Arbkart3.1 <- Arbkart3 + scale_fill_gradient(name = "Excess Coverage", low = "red", high = "green", na.value = "grey50") +
+  theme(axis.text.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks = element_blank(),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        rect = element_blank())
+Arbkart3.1
+
+##
+
+Arbkart4 <- ggplot(mapdata1, aes(x = long, y = lat, group = group)) +
+  geom_polygon(aes(fill = coord), col = "black")
+Arbkart4
+
+Arbkart4.1 <- Arbkart4 + scale_fill_brewer(name="kordinering av lønnsfastsettelse", palette = "Set3")+
+  theme(axis.text.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks = element_blank(),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        rect = element_blank())
+Arbkart4.1
+# The "Coord" variable takes 5 discrete levels. It may therefore be better to use a discrete scale for the coloring. 
+# To do this, simply replace "scale_fill_gradient(name="name", low="color1", high="color2", na.value="grey50")" with "scale_fill_brewer(name="name", palette = "Set1")" (or another set you prefer)
